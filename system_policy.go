@@ -2,13 +2,14 @@ package main
 
 /*
 #cgo CFLAGS: -x objective-c
-#cgo LDFLAGS: -F/System/Library/PrivateFrameworks
-#cgo LDFLAGS: -framework Foundation -framework SystemPolicy
+#cgo LDFLAGS: -framework Foundation
 #import <Foundation/Foundation.h>
+#import <dlfcn.h>
 #import "SPExecutionPolicy.h"
 #import "SPExecutionHistoryItem.h"
 
 typedef struct {
+	void *framework_handle;
 	NSArray<SPExecutionHistoryItem *> *historyItems;
 } history_items;
 
@@ -26,14 +27,21 @@ typedef struct {
 history_items
 init_history_items(void) {
 	history_items self;
-	SPExecutionPolicy *execPolicy = [[SPExecutionPolicy alloc] init];
-	self.historyItems = [execPolicy legacyExecutionHistory];
+	self.framework_handle = dlopen("/System/Library/PrivateFrameworks/SystemPolicy.framework/SystemPolicy", RTLD_LAZY);
+
+	if (self.framework_handle != NULL) {
+		Class SPExecutionPolicyClass = NSClassFromString(@"SPExecutionPolicy");
+		SPExecutionPolicy *execPolicy = [[SPExecutionPolicyClass alloc] init];
+		self.historyItems = [execPolicy legacyExecutionHistory];
+	}
+
 	return self;
 }
 
 void
 release_history_items(history_items self) {
 	self.historyItems = nil;
+	dlclose(self.framework_handle);
 }
 
 unsigned long
