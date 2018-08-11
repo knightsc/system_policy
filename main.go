@@ -6,6 +6,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/knightsc/legacy_exec_history/sp"
+
 	"github.com/kolide/osquery-go"
 	"github.com/kolide/osquery-go/plugin/table"
 )
@@ -49,28 +51,28 @@ func columns() []table.ColumnDefinition {
 func generate(ctx context.Context, queryContext table.QueryContext) ([]map[string]string, error) {
 	results := make([]map[string]string, 0)
 
-	items := legacyExecutionHistory()
+	items := sp.LegacyExecutionHistory()
 	for _, item := range items {
 		row := map[string]string{}
-		row["exec_path"] = item.execPath
-		row["last_seen"] = item.lastSeen.Format(time.RFC3339)
-		if item.mmapPath != "" {
-			row["mmap_path"] = item.mmapPath
+		row["exec_path"] = item.ExecPath
+		row["last_seen"] = item.LastSeen.Format(time.RFC3339)
+		if item.MmapPath != "" {
+			row["mmap_path"] = item.MmapPath
 		}
-		if item.signingID != "" {
-			row["signing_id"] = item.signingID
+		if item.SigningID != "" {
+			row["signing_id"] = item.SigningID
 		}
-		if item.teamID != "" {
-			row["team_id"] = item.teamID
+		if item.TeamID != "" {
+			row["team_id"] = item.TeamID
 		}
-		if item.cdHash != "" {
-			row["cd_hash"] = item.cdHash
+		if item.CDHash != "" {
+			row["cd_hash"] = item.CDHash
 		}
-		if item.responsiblePath != "" {
-			row["responsible_path"] = item.responsiblePath
+		if item.ResponsiblePath != "" {
+			row["responsible_path"] = item.ResponsiblePath
 		}
-		if item.developerName != "" {
-			row["developer_name"] = item.developerName
+		if item.DeveloperName != "" {
+			row["developer_name"] = item.DeveloperName
 		}
 
 		results = append(results, row)
