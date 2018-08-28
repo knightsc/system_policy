@@ -1,6 +1,6 @@
-# legacy_exec_history
+# system_policy
 
-osquery table extension that presents the history of 32-bit applications run on a 10.14 machine
+osquery table extension that allows querying of information from the macOS private SystemPolicy.framework.
 
 ## Introduction
 
@@ -40,8 +40,8 @@ This extension will only compile on macOS 10.14. Go 1.10.3 currently has a [bug]
 # export GOPATH=${HOME}/go
 
 # clone repo into GOPATH:
-git clone https://github.com/knightsc/legacy_exec_history.git $GOPATH/src/github.com/knightsc/legacy_exec_history
-cd $GOPATH/src/github.com/knightsc/legacy_exec_history
+git clone https://github.com/knightsc/system_policy.git $GOPATH/src/github.com/knightsc/system_policy
+cd $GOPATH/src/github.com/knightsc/system_policy
 
 # get dependencies and build
 dep ensure
@@ -65,17 +65,17 @@ osquery> select value from osquery_flags where name = 'extensions_socket';
 Then start the Go extension and have it communicate with osqueryi via the extension socket that you retrieved above:
 
 ```
-./legacy_exec_history -socket /Users/USERNAME/.osquery/shell.em
+./system_policy -socket /Users/USERNAME/.osquery/shell.em
 ```
 
 Alternatively, you can also autoload your extension when starting an osquery shell:
 
 ```
-osqueryi --extension ./legacy_exec_history
+osqueryi --extension ./system_policy
 ```
 
 ## Installing
 
 Installation of this extension should be similar to any other osquery extension. Start by reviewing the [Using Extensions](https://osquery.readthedocs.io/en/stable/deployment/extensions/) guide from the osquery project.
 
-Essentially you will want to rename the binary to legacy_exec_history.ext (or use the pre-built release version) and put it somewhere on your machine with the correct permissions. You can then add an entry for this extension in your autoload file.
+Essentially you will want to rename the binary to system_policy.ext (or use the pre-built release version) and put it somewhere on your machine with the correct permissions. You can then add an entry for this extension in your autoload file.
