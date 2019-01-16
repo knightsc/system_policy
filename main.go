@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/knightsc/legacy_exec_history/sp"
+	"github.com/knightsc/system_policy/sp"
 
 	"github.com/kolide/osquery-go"
 	"github.com/kolide/osquery-go/plugin/table"

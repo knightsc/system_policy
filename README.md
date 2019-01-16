@@ -33,18 +33,11 @@ This table extension provides a new read only table called `legacy_exec_history`
 
 ## Building
 
-This extension will only compile on macOS 10.14. Go 1.10.3 currently has a [bug](https://github.com/golang/go/issues/25908) compiling on macOS 10.14 so you will need to use the Go 1.11 beta until 1.10.4 is released which has the fix backported in it. [Dep](https://github.com/golang/dep) is used for dependency management and building is fairly straigth forward. Just follow the steps below.
+This extension will only compile on macOS 10.14. Go 1.10.3 currently has a [bug](https://github.com/golang/go/issues/25908) compiling on macOS 10.14 so you will need to use the Go 1.11 beta until 1.10.4 is released which has the fix backported in it.
 
 ```
-# if GOPATH is unset:
-# export GOPATH=${HOME}/go
-
-# clone repo into GOPATH:
-git clone https://github.com/knightsc/system_policy.git $GOPATH/src/github.com/knightsc/system_policy
-cd $GOPATH/src/github.com/knightsc/system_policy
-
-# get dependencies and build
-dep ensure
+git clone https://github.com/knightsc/system_policy.git 
+cd system_policy
 go build
 ```
 
