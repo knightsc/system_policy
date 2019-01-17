@@ -11,8 +11,9 @@ init_history_items(void) {
 	self.framework_handle = dlopen("/System/Library/PrivateFrameworks/SystemPolicy.framework/SystemPolicy", RTLD_LAZY);
 
 	if (self.framework_handle != NULL) {
+		self.pool = [[NSAutoreleasePool alloc] init];
 		Class SPExecutionPolicyClass = NSClassFromString(@"SPExecutionPolicy");
-		SPExecutionPolicy *execPolicy = [[SPExecutionPolicyClass alloc] init];
+		SPExecutionPolicy *execPolicy = [[[SPExecutionPolicyClass alloc] init] autorelease];
 		self.historyItems = [execPolicy legacyExecutionHistory];
 	}
 
@@ -22,7 +23,12 @@ init_history_items(void) {
 void
 release_history_items(history_items self) {
 	self.historyItems = nil;
+	
+	[self.pool release];
+	self.pool = nil;
+
 	dlclose(self.framework_handle);
+	self.framework_handle = NULL;
 }
 
 unsigned long
@@ -54,8 +60,9 @@ init_kext_items(void) {
 	self.framework_handle = dlopen("/System/Library/PrivateFrameworks/SystemPolicy.framework/SystemPolicy", RTLD_LAZY);
 
 	if (self.framework_handle != NULL) {
+		self.pool = [[NSAutoreleasePool alloc] init];
 		Class SPKernelExtensionPolicyClass = NSClassFromString(@"SPKernelExtensionPolicy");
-		SPKernelExtensionPolicy *kextPolicy = [[SPKernelExtensionPolicyClass alloc] init];
+		SPKernelExtensionPolicy *kextPolicy = [[[SPKernelExtensionPolicyClass alloc] init] autorelease];
 		self.kextItems = [kextPolicy currentPolicy];
 	}
 
@@ -65,7 +72,12 @@ init_kext_items(void) {
 void
 release_kext_items(kext_items self) {	
 	self.kextItems = nil;
-	dlclose(self.framework_handle);
+
+	[self.pool release];
+	self.pool = nil;
+	
+	dlclose(self.framework_handle);	
+	self.framework_handle = NULL;
 }
 
 unsigned long

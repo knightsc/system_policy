@@ -5,6 +5,7 @@
 
 typedef struct {
 	void *framework_handle;
+	NSAutoreleasePool *pool;
 	NSArray<SPExecutionHistoryItem *> *historyItems;
 } history_items;
 
@@ -26,6 +27,7 @@ history_item get_history_item(history_items self, unsigned long index);
 
 typedef struct {
 	void *framework_handle;
+	NSAutoreleasePool *pool;
 	NSArray<SPKernelExtensionPolicyItem *> *kextItems;
 } kext_items;
 
