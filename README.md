@@ -4,21 +4,36 @@ osquery table extension that allows querying of information from the macOS priva
 
 ## Introduction
 
-At the 2018 WWDC State of the Union event, following the announcement of macOS Mojave (macOS 10.14) in the keynote earlier in the day, Apple vice president of software Sebastien Marineau revealed Mojave will be "the last release to support 32-bit at all.". Since macOS 10.13.4, Apple has provided the ability to set your machine to 64-bit only mode for testing. For most users this is not a very convenient way to test. As of 10.14 the System Information application has a new "Legacy Software" section that shows you all of the 32-bit applications that have been run on the machine.
+Beginning with macOS 10.13 Apple started enforcing certain system policies. One of those policies is the requirement that loaded kernel extensions need to be approved by the user. These system policies are also reponsible for keeping track of what 32-bit applications have been run. As announced at the 2018 WWDC, macOS 10.14 will be the last version of macOS to support 32-bit applications. This information can be viewed in the System Information application.
 
-This new "Legacy Software" information provides great insight for Mac Admins into what 32-bit applications their users are running so that they can work with vendors to get software updated prior to the release of macOS 10.15 in the fall of 2019.
-
-This legacy information is just stored in a sqlite database located in `/var/db/SystemPolicyConfiguration/` called `ExecPolicy`. You can actually query this information yourself from the command line but it does require root access.
+This information is just stored in sqlite databases located in `/var/db/SystemPolicyConfiguration/`. You can actually query this information yourself from the command line but it does require root access.
 
 ```
-sudo sqlite3 /var/db/SystemPolicyConfiguration/ExecPolicy 'select * from legacy_exec_history_v3'
+sudo sqlite3 /var/db/SystemPolicyConfiguration/ExecPolicy 'select * from legacy_exec_history_v4'
 ```
 
 In order to provide a more convienant method to get this information this osquery table plugin was created. It does not require any special privileges because just like the System Information application it uses the `SystemPolicy.framework` to talk directly to `syspolicyd` to get this information. By making this an osquery extension it allows us to query this information uniformly across an entire fleet of macOS machines.
 
 ## Extension Overview
 
-This table extension provides a new read only table called `legacy_exec_history` with the following layout:
+This table extension provides two new read only tables with the following layout:
+
+### kext\_policy
+Data only returned on macOS 10.13 and higher
+
+| Column           | Type    | Description                                         |
+|------------------|---------|-----------------------------------------------------|
+| developer_name   | TEXT    | Name of the developer who signed the kext           |
+| application_name | TEXT    | Name of the application that tried to load the kext |
+| application_path | TEXT    | Path to the application that tried to load the kext |
+| team_id          | TEXT    | The Team ID from the code signing blob              |
+| bundle_id        | TEXT    | The Bundle ID of the kext                           |
+| allowed          | INTEGER | Whether the kext has been user/mdm approved or not  |
+| reboot_required  | INTEGER | If the kext requires a reboot                       |
+| modified         | INTEGER | Unknown                                             |
+
+### legacy\_exec\_history
+Data only returned on macOS 10.14 and higher
 
 | Column           | Type | Description                                                      |
 |------------------|------|------------------------------------------------------------------|
@@ -33,7 +48,7 @@ This table extension provides a new read only table called `legacy_exec_history`
 
 ## Building
 
-This extension will only compile on macOS 10.14. Go 1.10.3 currently has a [bug](https://github.com/golang/go/issues/25908) compiling on macOS 10.14 so you will need to use the Go 1.11 beta until 1.10.4 is released which has the fix backported in it.
+Since this project makes use of the new [modules](https://github.com/golang/go/wiki/Modules) functionality Go 1.11 or above will be required to compile. It should compile on all versions of macOS. Building is as simple as the following:
 
 ```
 git clone https://github.com/knightsc/system_policy.git 

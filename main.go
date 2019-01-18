@@ -23,19 +23,20 @@ func main() {
 		log.Fatalln("--socket flag cannot be empty")
 	}
 
-	server, err := osquery.NewExtensionManagerServer("legacy_exec_history", *flSocket)
+	server, err := osquery.NewExtensionManagerServer("system_policy", *flSocket)
 	if err != nil {
 		log.Fatalf("Error creating osquery extension server: %s\n", err)
 	}
 
-	server.RegisterPlugin(table.NewPlugin("legacy_exec_history", columns(), generate))
+	server.RegisterPlugin(table.NewPlugin("legacy_exec_history", execColumns(), execGenerate))
+	server.RegisterPlugin(table.NewPlugin("kext_policy", kextColumns(), kextGenerate))
 
 	if err := server.Run(); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func columns() []table.ColumnDefinition {
+func execColumns() []table.ColumnDefinition {
 	return []table.ColumnDefinition{
 		table.TextColumn("exec_path"),
 		table.TextColumn("mmap_path"),
@@ -48,7 +49,7 @@ func columns() []table.ColumnDefinition {
 	}
 }
 
-func generate(ctx context.Context, queryContext table.QueryContext) ([]map[string]string, error) {
+func execGenerate(ctx context.Context, queryContext table.QueryContext) ([]map[string]string, error) {
 	results := make([]map[string]string, 0)
 
 	items := sp.LegacyExecutionHistory()
@@ -73,6 +74,56 @@ func generate(ctx context.Context, queryContext table.QueryContext) ([]map[strin
 		}
 		if item.DeveloperName != "" {
 			row["developer_name"] = item.DeveloperName
+		}
+
+		results = append(results, row)
+	}
+
+	return results, nil
+}
+
+func kextColumns() []table.ColumnDefinition {
+	return []table.ColumnDefinition{
+		table.TextColumn("developer_name"),
+		table.TextColumn("application_name"),
+		table.TextColumn("application_path"),
+		table.TextColumn("team_id"),
+		table.TextColumn("bundle_id"),
+		table.IntegerColumn("allowed"),
+		table.IntegerColumn("reboot_required"),
+		table.IntegerColumn("modified"),
+	}
+}
+
+func kextGenerate(ctx context.Context, queryContext table.QueryContext) ([]map[string]string, error) {
+	results := make([]map[string]string, 0)
+
+	items := sp.CurrentKernelExtensionPolicy()
+	for _, item := range items {
+		row := map[string]string{}
+		row["developer_name"] = item.DeveloperName
+		if item.ApplicationName != "" {
+			row["application_name"] = item.ApplicationName
+		}
+		if item.ApplicationPath != "" {
+			row["application_path"] = item.ApplicationPath
+		}
+		row["team_id"] = item.TeamID
+		row["bundle_id"] = item.BundleID
+		if item.Allowed {
+			row["allowed"] = "1"
+		} else {
+			row ["allowed"] = "0"
+		}
+		if item.RebootRequired {
+			row["reboot_required"] = "1"
+		} else {
+			row ["reboot_required"] = "0"
+		}
+		if item.Modified {
+			row["modified"] = "1"
+		} else {
+			row ["modified"] = "0"
 		}
 
 		results = append(results, row)
