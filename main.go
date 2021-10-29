@@ -4,7 +4,7 @@ import (
 	"flag"
 	"log"
 
-	osquery "github.com/kolide/osquery-go"
+	osquery "github.com/osquery/osquery-go"
 
 	"github.com/knightsc/system_policy/osquery/table/kextpolicy"
 	"github.com/knightsc/system_policy/osquery/table/legacyexec"

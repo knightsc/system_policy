@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/knightsc/system_policy/sp"
-	"github.com/kolide/osquery-go/plugin/table"
+	"github.com/osquery/osquery-go/plugin/table"
 )
 
 func TablePlugin() *table.Plugin {
